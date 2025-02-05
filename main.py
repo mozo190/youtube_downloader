@@ -1,8 +1,12 @@
 import os
 
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, QPushButton, QLabel, QComboBox
-from youtube import YouTube
+from pytube import YouTube, request
 
+# User-agent is needed to download videos from YouTube
+os.environ["PYTUBE_USER_AGENT"] = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"
+                                   " Chrome/58.0.3029.110 Safari/537.3")
+request.DEFAULT_USER_AGENT = os.environ["PYTUBE_USER_AGENT"]
 
 class YouTubeDownloader(QWidget):
     def __init__(self):
