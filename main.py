@@ -68,6 +68,7 @@ class YouTubeDownloader(QWidget):
     def download_audio(self, url, path="downloads"):
         print(f"Download audio from {url}")
         try:
+            url = clear_url(url)
             yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
             stream = yt.streams.filter(only_audio=True).first()
             if not os.path.exists(path):
@@ -83,6 +84,7 @@ class YouTubeDownloader(QWidget):
     def download_video(self, url, path="downloads"):
         print(f"Download video from {url}")
         try:
+            url = clear_url(url)
             yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
             stream = yt.streams.filter(progressive=True, file_extension="mp4").first()
             if not os.path.exists(path):
