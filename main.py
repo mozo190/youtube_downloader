@@ -1,7 +1,8 @@
 import os
 
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, QPushButton, QLabel, QComboBox
-from youtube3 import youtube
+from youtube import YouTube
+
 
 class YouTubeDownloader(QWidget):
     def __init__(self):
@@ -59,6 +60,18 @@ class YouTubeDownloader(QWidget):
             base, ext = os.path.splitext(out_file)
             new_file = base + ".mp3"
             os.rename(out_file, new_file)
+        except Exception as e:
+            print(e)
+            self.status_label.setText("Status: Download failed!", e)
+
+    def download_video(self, url, path="downloads"):
+        print(f"Download video from {url}")
+        try:
+            yt = YouTube(url)
+            stream = yt.streams.filter(progressive=True).first()
+            if not os.path.exists(path):
+                os.makedirs(path)
+            stream.download(output_path=path)
         except Exception as e:
             print(e)
             self.status_label.setText("Status: Download failed!", e)
