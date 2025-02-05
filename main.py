@@ -1,6 +1,6 @@
 import os
 import re
-
+import yt_dlp
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, QPushButton, QLabel, QComboBox
 from pytube import YouTube, request
 
@@ -68,15 +68,19 @@ class YouTubeDownloader(QWidget):
     def download_audio(self, url, path="downloads"):
         print(f"Download audio from {url}")
         try:
-            url = clear_url(url)
-            yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
-            stream = yt.streams.filter(only_audio=True).first()
+            ydl_opts = {
+                "format": "bestaudio",
+                "outtmpl": f"{path}/%(title)s.%(ext)s",
+                "postprocessors": [{
+                    "key": "FFmpegExtractAudio",
+                    "preferredcodec": "mp3",
+                    "preferredquality": "192",
+                }],
+            }
             if not os.path.exists(path):
                 os.makedirs(path)
-            out_file = stream.download(output_path=path)
-            base, ext = os.path.splitext(out_file)
-            new_file = base + ".mp3"
-            os.rename(out_file, new_file)
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([url])
         except Exception as e:
             print(e)
             self.status_label.setText("Status: Download failed!", e)
@@ -84,12 +88,14 @@ class YouTubeDownloader(QWidget):
     def download_video(self, url, path="downloads"):
         print(f"Download video from {url}")
         try:
-            url = clear_url(url)
-            yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
-            stream = yt.streams.filter(progressive=True, file_extension="mp4").first()
+            ydl_opts = {
+                "format": "best",
+                "outtmpl": f"{path}/%(title)s.%(ext)s"
+            }
             if not os.path.exists(path):
                 os.makedirs(path)
-            stream.download(output_path=path)
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([url])
         except Exception as e:
             print(e)
             self.status_label.setText("Status: Download failed!", e)
