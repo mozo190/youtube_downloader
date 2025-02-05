@@ -1,4 +1,5 @@
 import os
+import re
 
 from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLineEdit, QPushButton, QLabel, QComboBox
 from pytube import YouTube, request
@@ -7,6 +8,17 @@ from pytube import YouTube, request
 os.environ["PYTUBE_USER_AGENT"] = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"
                                    " Chrome/58.0.3029.110 Safari/537.3")
 request.DEFAULT_USER_AGENT = os.environ["PYTUBE_USER_AGENT"]
+
+
+def clear_url(url):
+    if "https://" in url:
+        url = url.replace("https://", "")
+    if "http://" in url:
+        url = url.replace("http://", "")
+    if "www." in url:
+        url = url.replace("www.", "")
+    return re.sub(r"&.*", "", url)
+
 
 class YouTubeDownloader(QWidget):
     def __init__(self):
@@ -56,7 +68,7 @@ class YouTubeDownloader(QWidget):
     def download_audio(self, url, path="downloads"):
         print(f"Download audio from {url}")
         try:
-            yt = YouTube(url)
+            yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
             stream = yt.streams.filter(only_audio=True).first()
             if not os.path.exists(path):
                 os.makedirs(path)
@@ -71,8 +83,8 @@ class YouTubeDownloader(QWidget):
     def download_video(self, url, path="downloads"):
         print(f"Download video from {url}")
         try:
-            yt = YouTube(url)
-            stream = yt.streams.filter(progressive=True).first()
+            yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
+            stream = yt.streams.filter(progressive=True, file_extension="mp4").first()
             if not os.path.exists(path):
                 os.makedirs(path)
             stream.download(output_path=path)
